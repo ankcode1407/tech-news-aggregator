@@ -1,30 +1,30 @@
 name: Daily News Fetch
 
 on:
-  schedule:
-    # Runs at 00:00 UTC every day
-    - cron: '0 0 * * *'
-  workflow_dispatch: # Allows you to run this workflow manually
+  workflow_dispatch: # We will only run this manually for now
 
 jobs:
   fetch-news:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
+      - name: 1. Check out repository code
         uses: actions/checkout@v4
 
-      - name: List files in the repository
+      - name: 2. List all files in the directory
         run: ls -R
 
-      - name: Set up Python
+      - name: 3. Show the exact content of fetch_script.py
+        run: cat fetch_script.py
+
+      - name: 4. Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: 5. Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run news fetching script
+      - name: 6. Run the script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
