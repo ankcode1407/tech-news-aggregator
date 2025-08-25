@@ -1,3 +1,11 @@
+name: Daily News Fetch
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows you to run this workflow manually
+
 jobs:
   fetch-news:
     runs-on: ubuntu-latest
@@ -5,10 +13,8 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      # --- NEW DEBUGGING STEP ---
       - name: List files in the repository
         run: ls -R
-      # --- END OF DEBUGGING STEP ---
 
       - name: Set up Python
         uses: actions/setup-python@v5
