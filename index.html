@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech News Aggregator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A simple custom font from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">Latest Tech News</h1>
+            <p class="text-lg text-gray-600 mt-2">A curated feed of the latest articles from the tech world.</p>
+        </header>
+
+        <!-- This is where the articles will be injected by JavaScript -->
+        <main id="articles-container" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Loading message -->
+            <p id="loading-message" class="col-span-full text-center text-gray-500">Fetching articles...</p>
+        </main>
+    </div>
+
+    <script>
+        // This script runs after the HTML document has been fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const articlesContainer = document.getElementById('articles-container');
+            const loadingMessage = document.getElementById('loading-message');
+
+            // --- IMPORTANT ---
+            // This is the URL for your backend API. 
+            // Since you are running the Flask server locally, this URL works.
+            // If you deploy your backend, you would change this to your production URL.
+            const API_URL = 'http://127.0.0.1:5000/api/articles';
+
+            async function fetchArticles() {
+                try {
+                    const response = await fetch(API_URL);
+
+                    // Check if the request was successful
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const articles = await response.json();
+
+                    // Clear the "Loading..." message
+                    loadingMessage.remove();
+
+                    // If there are no articles, show a message
+                    if (articles.length === 0) {
+                        articlesContainer.innerHTML = '<p class="col-span-full text-center text-gray-500">No articles found. Try running the fetch script!</p>';
+                        return;
+                    }
+
+                    // Loop through each article and create an HTML card for it
+                    articles.forEach(article => {
+                        // Format the date for better readability
+                        const publishedDate = new Date(article.published_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+
+                        const articleCard = `
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div class="p-6">
+                                    <p class="text-sm text-gray-500 mb-2">${article.source || 'Unknown Source'} &bull; ${publishedDate}</p>
+                                    <h2 class="text-xl font-bold mb-3">${article.title}</h2>
+                                    <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="inline-block text-blue-600 font-semibold hover:text-blue-800 transition-colors duration-300">
+                                        Read Full Article &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        // Add the new card to the container
+                        articlesContainer.innerHTML += articleCard;
+                    });
+
+                } catch (error) {
+                    // If an error occurs, display it on the page
+                    console.error('Failed to fetch articles:', error);
+                    loadingMessage.remove();
+                    articlesContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-semibold">Failed to load articles. Make sure your backend server is running. Error: ${error.message}</p>`;
+                }
+            }
+
+            // Call the function to fetch and display articles
+            fetchArticles();
+        });
+    </script>
+
+</body>
+</html>
